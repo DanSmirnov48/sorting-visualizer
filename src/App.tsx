@@ -3,7 +3,7 @@ import { Select } from "./components/Select";
 import { Slider } from "./components/Slider";
 import { useSortingAlgorithmContext } from "./context/Visualizer";
 import { SortingAlgorithmType } from "./lib/types";
-import { algorithmOptions } from "./lib/utils";
+import { algorithmOptions, generateAnimationArray } from "./lib/utils";
 import { FaPlayCircle } from "react-icons/fa";
 
 export default function App() {
@@ -14,15 +14,29 @@ export default function App() {
     requiresReset,
     animationSpeed,
     selectedAlgorithm,
+    runAnimation,
     setAnimationSpeed,
     setSelectedAlgorithm,
+    resetArrayAndAnimation
   } = useSortingAlgorithmContext();
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedAlgorithm(e.target.value as SortingAlgorithmType);
   };
 
-  const handlePlay = () => {};
+  const handlePlay = () => {
+    if (requiresReset) {
+      resetArrayAndAnimation();
+      return;
+    }
+
+    generateAnimationArray(
+      selectedAlgorithm,
+      isSorting,
+      arrayToSort,
+      runAnimation
+    );
+  };
 
   return (
     <main className="absolute top-0 z-[-2] h-screen w-screen bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]">

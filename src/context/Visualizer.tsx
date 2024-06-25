@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { SortingAlgorithmType } from "../lib/types";
+import { AnimationArrayType, SortingAlgorithmType } from "../lib/types";
 import { generateRandomNumberFromInterval, MAX_ANIMATION_SPEED } from "../lib/utils";
 
 interface SortingAlgorithmContextType {
@@ -11,7 +11,7 @@ interface SortingAlgorithmContextType {
     animationSpeed: number;
     setAnimationSpeed: (speed: number) => void;
     resetArrayAndAnimation: () => void;
-    runAnimation: () => void;
+    runAnimation: (animation: AnimationArrayType) => void;
     isAnimationComplete: boolean;
     requiresReset: boolean;
 }
@@ -52,9 +52,55 @@ export const SortingAlgorithmProvider = ({ children }: { children: ReactNode }) 
         setArrayToSort(tempArray);
         setIsSorting(false);
         setIsAnimationComplete(false);
-    }
 
-    const runAnimation = () => { }
+        const highestId = window.setTimeout(() => {
+            for (let i = highestId; i >= 0; i--) {
+                window.clearInterval(i);
+            }
+        }, 0);
+
+        setTimeout(() => {
+            const arrLines = document.getElementsByClassName("array-line");
+            for (let i = 0; i < arrLines.length; i++) {
+                arrLines[i].classList.remove("change-line-color");
+                arrLines[i].classList.add("default-line-color");
+            }
+        }, 0);
+    };
+
+    const runAnimation = (animations: AnimationArrayType) => {
+        setIsSorting(true);
+
+        const inverseSpeed = (1 / animationSpeed) * 200;
+        const arrLines = document.getElementsByClassName("array-line") as HTMLCollectionOf<HTMLElement>;
+
+        const updateClassList = (indexes: number[], addClassName: string, removeClassName: string) => {
+            indexes.forEach((index) => {
+                arrLines[index].classList.add(addClassName);
+                arrLines[index].classList.remove(removeClassName);
+            });
+        };
+
+        const updateHeightValue = (lineIndex: number, newHeight: number) => {
+            arrLines[lineIndex].style.height = `${newHeight}px`;
+        };
+
+        animations.forEach((animation, index) => {
+            setTimeout(() => {
+                const [lineIndexes, isSwap] = animation;
+                if (!isSwap) {
+                    updateClassList(lineIndexes, "change-line-color", "default-line-color");
+                    setTimeout(
+                        () => updateClassList(lineIndexes, "default-line-color", "change-line-color"),
+                        inverseSpeed
+                    );
+                } else {
+                    const [lineIndex, newHeight] = lineIndexes;
+                    updateHeightValue(lineIndex, newHeight);
+                }
+            }, index * inverseSpeed);
+        });
+    };
 
     const value = {
         arrayToSort,
