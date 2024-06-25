@@ -1,14 +1,17 @@
+import { RxReset } from "react-icons/rx";
 import { Select } from "./components/Select";
 import { Slider } from "./components/Slider";
 import { useSortingAlgorithmContext } from "./context/Visualizer";
 import { SortingAlgorithmType } from "./lib/types";
 import { algorithmOptions } from "./lib/utils";
+import { FaPlayCircle } from "react-icons/fa";
 
 export default function App() {
 
   const {
-    arrayToSort,
     isSorting,
+    arrayToSort,
+    requiresReset,
     animationSpeed,
     selectedAlgorithm,
     setAnimationSpeed,
@@ -18,6 +21,8 @@ export default function App() {
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedAlgorithm(e.target.value as SortingAlgorithmType);
   };
+
+  const handlePlay = () => {};
 
   return (
     <main className="absolute top-0 z-[-2] h-screen w-screen bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]">
@@ -39,6 +44,16 @@ export default function App() {
                 onChange={handleSelectChange}
                 isDisabled={isSorting}
               />
+              <button
+                className="flex items-center justify-center"
+                onClick={handlePlay}
+              >
+                {requiresReset ? (
+                  <RxReset className="text-gray-400 h-8 w-8" />
+                ) : (
+                  <FaPlayCircle className="text-system-green60 h-8 w-8" />
+                )}
+              </button>
             </div>
           </div>
           <div className="relative h-[calc(100vh-66px)] w-full">

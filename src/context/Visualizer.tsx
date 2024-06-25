@@ -1,6 +1,6 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { SortingAlgorithmType } from "../lib/types";
-import { MAX_ANIMATION_SPEED } from "../lib/utils";
+import { generateRandomNumberFromInterval, MAX_ANIMATION_SPEED } from "../lib/utils";
 
 interface SortingAlgorithmContextType {
     arrayToSort: number[];
@@ -13,6 +13,7 @@ interface SortingAlgorithmContextType {
     resetArrayAndAnimation: () => void;
     runAnimation: () => void;
     isAnimationComplete: boolean;
+    requiresReset: boolean;
 }
 
 const SortingAlgorithmContext = createContext<SortingAlgorithmContextType | undefined>(undefined);
@@ -23,8 +24,35 @@ export const SortingAlgorithmProvider = ({ children }: { children: ReactNode }) 
     const [isSorting, setIsSorting] = useState<boolean>(false);
     const [isAnimationComplete, setIsAnimationComplete] = useState<boolean>(false);
     const [animationSpeed, setAnimationSpeed] = useState<number>(MAX_ANIMATION_SPEED);
+    const requiresReset = isAnimationComplete || isSorting;
 
-    const resetArrayAndAnimation = () => { }
+    useEffect(() => {
+        resetArrayAndAnimation();
+        window.addEventListener("resize", resetArrayAndAnimation);
+
+        return () => {
+            window.removeEventListener("resize", resetArrayAndAnimation);
+        };
+    }, []);
+
+    const resetArrayAndAnimation = () => {
+        const contentContainer = document.getElementById("content-container");
+        if (!contentContainer) return;
+        const contentContainerWidth = contentContainer.clientWidth;
+
+        const tempArray: number[] = [];
+        const numLines = contentContainerWidth / 8;
+        const containerHeight = window.innerHeight;
+        const maxLineHeight = Math.max(containerHeight - 420, 100);
+
+        for (let i = 0; i < numLines; i++) {
+            tempArray.push(generateRandomNumberFromInterval(35, maxLineHeight));
+        }
+
+        setArrayToSort(tempArray);
+        setIsSorting(false);
+        setIsAnimationComplete(false);
+    }
 
     const runAnimation = () => { }
 
@@ -39,6 +67,7 @@ export const SortingAlgorithmProvider = ({ children }: { children: ReactNode }) 
         isAnimationComplete,
         resetArrayAndAnimation,
         runAnimation,
+        requiresReset
     };
 
     return <SortingAlgorithmContext.Provider value={value}>{children}</SortingAlgorithmContext.Provider>
